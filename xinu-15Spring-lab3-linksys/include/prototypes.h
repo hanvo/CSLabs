@@ -239,6 +239,13 @@ extern	void	xdone(void);
 /* in file yield.c */
 extern	syscall	yield(void);
 
+/* sendb.c */ 
+extern syscall 	sendb(pid32,umsg32);
+
+/* receiveb.c */
+extern umsg32 receiveb(void);
+
+
 /* NETWORK BYTE ORDER CONVERSION NOT NEEDED ON A BIG-ENDIAN COMPUTER */
 #define	htons(x)	(x)
 #define	htonl(x)	(x)

@@ -16,6 +16,8 @@
 #define	PR_SUSP		5	/* process is suspended			*/
 #define	PR_WAIT		6	/* process is on semaphore queue	*/
 #define	PR_RECTIM	7	/* process is receiving with timeout	*/
+#define PR_SND 		8  	/* IM SENDING YO A MESSSAGE PICK UP PLS */
+
 
 /* Miscellaneous process definitions */
 
@@ -45,6 +47,8 @@
 
 /* Definition of the process table (multiple of 32 bits) */
 
+
+
 struct procent {		/* entry in the process table		*/
 	uint16	prstate;	/* process state: PR_CURR, etc.		*/
 	pri16	prprio;		/* process priority			*/
@@ -57,6 +61,12 @@ struct procent {		/* entry in the process table		*/
 	umsg32	prmsg;		/* message sent to this process		*/
 	bool8	prhasmsg;	/* nonzero iff msg is valid		*/
 	int16	prdesc[NDESC];	/* device descriptors for process	*/
+
+
+	qid16	receivelist;	/* index of ready list		*/
+	umsg32 	sndmsg; 		/* msg that is trying to be sent but cant */ 
+	char 	sndflag; 		/* TRUE - something is stored to be sent */
+
 };
 
 /* Marker for the top of a process stack (used to help detect overflow)	*/

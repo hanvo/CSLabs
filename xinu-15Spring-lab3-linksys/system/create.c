@@ -106,6 +106,9 @@ pid32	create(
 	for (i = 0; i < nargs; i++) {	/* copy args onto process stack	*/
 		*savargs++ = *ap++;
 	}
+
+	prptr->receivelist = newqueue();
+
 	restore(mask);
 	return pid;
 }
