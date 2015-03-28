@@ -54,10 +54,10 @@ syscall	kill(
 		prptr->prstate = PR_FREE;
 	}
 
-	while(nonempty(prptr->receivelist))
-	{
-		getfirst(prptr->receivelist);
-	}
+	//while(nonempty(prptr->receivelist))
+	//{
+	//	getfirst(prptr->receivelist);
+	//}
 
 	restore(mask);
 	return OK;

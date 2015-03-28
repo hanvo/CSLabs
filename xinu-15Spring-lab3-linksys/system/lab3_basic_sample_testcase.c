@@ -35,6 +35,7 @@ static void receiver0(void){
     score+= 6;
     kprintf("Test0: Pass\r\n");
   }
+  kprintf("Exit\r\n");
 }
 
 static void sender0(int pid){
@@ -143,6 +144,7 @@ void test0(void){
   if( kill( pid ) == OK ){
     kprintf("test 0 failed: receiver did not return\r\n");
   }
+
   kill( senderpid );
   kprintf("Test0 finished\r\n");
   sleep(1);
@@ -220,13 +222,13 @@ void blocksending_test(void) {
   kprintf("======================Start Testing=====================\r\n");
   test0();
 
-  test1();
+  //test1();
 
-  test2();
+  //test2();
 
-  test3();
+  //test3();
 
-  test4();
+  //test4();
   
   kprintf("Total Score: %d\r\n", score );
   kprintf("======================End of Test=====================\r\n");

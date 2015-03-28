@@ -19,6 +19,7 @@ umsg32	receiveb(void)
 	}
 	msg = prptr->prmsg;			/* retrieve message		*/
 	prptr->prhasmsg = FALSE;	/* reset message flag		*/
+
 	/*
 	* 	Check if you have something in the receiveq. 
 	* 	if so you will dequeue recieveq 
@@ -28,8 +29,7 @@ umsg32	receiveb(void)
 	{
 		pid = getfirst(prptr->receivelist);
 		prblcked = &proctab[pid];
-		prblcked->prstate = PR_READY;
-
+		ready(pid,RESCHED_YES);
 	}
 
 	restore(mask);

@@ -9,7 +9,7 @@ syscall	sendb(
 {
 	intmask	mask;				/* saved interrupt mask		*/
 	struct	procent *prptr;		/* ptr to process' table entry	*/
-	struct	procent *myself;		/* ptr to process' table entry	*/
+	struct	procent *myself;	/* ptr to process' table entry	*/
 
 
 	mask = disable();
@@ -23,6 +23,7 @@ syscall	sendb(
 		restore(mask);
 		return SYSERR;
 	}
+
 	if(prptr->prhasmsg)
 	{
 		/*
@@ -33,28 +34,36 @@ syscall	sendb(
 		*		- Change process to PR_SND
 		*		- resched()
 		*/
+		kprintf("ALREADY HAS MSG: Sedning Msg: %d\r\n", msg);
 		myself = &proctab[currpid];
 		myself->sndmsg = msg;
 		myself->sndflag = TRUE;
 		myself->prstate = PR_SND;
-		enqueue(pid,prptr->receivelist);
+		enqueue(currpid,prptr->receivelist);
 		resched();
+		if(!prptr->prhasmsg)
+		{
+			prptr->prmsg = msg;			/* deliver message		*/
+			prptr->prhasmsg = TRUE;		/* indicate message is waiting	*/
+		}
 	}
 	else
 	{
+		kprintf("STANDARD: Sedning Msg: %d\r\n", msg);
+		/*Case 1 */
 		prptr->prmsg = msg;		/* deliver message		*/
 		prptr->prhasmsg = TRUE;		/* indicate message is waiting	*/
+		/* If recipient waiting or in timed-wait make it ready */
+		if (prptr->prstate == PR_RECV) {
+			ready(pid, RESCHED_YES);
+		} else if (prptr->prstate == PR_RECTIM) {
+			unsleep(pid);
+			ready(pid, RESCHED_YES);
+		}
 	}
 
 
-	/* If recipient waiting or in timed-wait make it ready */
 
-	if (prptr->prstate == PR_RECV) {
-		ready(pid, RESCHED_YES);
-	} else if (prptr->prstate == PR_RECTIM) {
-		unsleep(pid);
-		ready(pid, RESCHED_YES);
-	}
 	restore(mask);		/* restore interrupts */
 	return OK;
 }
