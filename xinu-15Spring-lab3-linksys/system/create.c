@@ -108,6 +108,9 @@ pid32	create(
 	}
 
 	prptr->receivelist = newqueue();
+	prptr->msgq = newqueue();
+	prptr->msgqCount = 0;
+
 
 	restore(mask);
 	return pid;

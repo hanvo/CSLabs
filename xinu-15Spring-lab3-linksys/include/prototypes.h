@@ -251,6 +251,12 @@ extern syscall senda(pid32,umsg32);
 /* registercb.c */
 extern syscall registercb(umsg32 *, int (* func)(void));
 
+/* sendq.c */
+extern syscall sendq(pid32,umsg32);
+
+/* receiveq.c */
+extern umsg32 receiveq(void);
+
 
 /* NETWORK BYTE ORDER CONVERSION NOT NEEDED ON A BIG-ENDIAN COMPUTER */
 #define	htons(x)	(x)

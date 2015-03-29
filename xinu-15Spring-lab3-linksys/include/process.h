@@ -45,8 +45,10 @@
 
 #define NDESC		5	/* must be odd to make procent 4N bytes	*/
 
-/* Definition of the process table (multiple of 32 bits) */
+#define MSGQ_SIZE 3 	/* IPC msg q for middle ground */
 
+
+/* Definition of the process table (multiple of 32 bits) */
 
 
 struct procent {		/* entry in the process table		*/
@@ -69,6 +71,9 @@ struct procent {		/* entry in the process table		*/
  
 	int 	(* func)(void); /* Async func pointer to function that called */
 	umsg32 	*abuf; 			/* message buffer.  */ 
+
+	qid16	msgq;
+	char 	msgqCount;		/*counter */ 
 
 };
 

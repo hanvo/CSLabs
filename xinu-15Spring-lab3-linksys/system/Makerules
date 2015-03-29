@@ -41,7 +41,7 @@ C_FILES += kprintf.c debug.c
 C_FILES += ascdate.c
 
 #Lab3 files
-C_FILES += sendb.c receiveb.c senda.c registercb.c
+C_FILES += sendb.c receiveb.c senda.c registercb.c sendq.c receiveq.c
 
 # Main program
 C_FILES += lab3_basic_sample_testcase.c
