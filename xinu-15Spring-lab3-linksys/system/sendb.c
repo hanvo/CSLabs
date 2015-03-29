@@ -34,7 +34,7 @@ syscall	sendb(
 		*		- Change process to PR_SND
 		*		- resched()
 		*/
-		kprintf("ALREADY HAS MSG: Sedning Msg: %d\r\n", msg);
+		//kprintf("ALREADY HAS MSG: Sedning Msg: %d\r\n", msg);
 		myself = &proctab[currpid];
 		myself->sndmsg = msg;
 		myself->sndflag = TRUE;
@@ -49,7 +49,7 @@ syscall	sendb(
 	}
 	else
 	{
-		kprintf("STANDARD: Sedning Msg: %d\r\n", msg);
+		//kprintf("STANDARD: Sedning Msg: %d\r\n", msg);
 		/*Case 1 */
 		prptr->prmsg = msg;		/* deliver message		*/
 		prptr->prhasmsg = TRUE;		/* indicate message is waiting	*/

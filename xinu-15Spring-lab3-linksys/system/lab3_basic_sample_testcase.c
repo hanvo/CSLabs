@@ -222,19 +222,19 @@ void blocksending_test(void) {
   kprintf("======================Start Testing=====================\r\n");
   test0();
 
-  //test1();
+  test1();
 
-  //test2();
+  test2();
 
-  //test3();
+  test3();
 
-  //test4();
+  test4();
   
   kprintf("Total Score: %d\r\n", score );
   kprintf("======================End of Test=====================\r\n");
 }
 
-/*
+
 // Asynchronous message receive test
 umsg32 recvbuf;
 int myrecvhandler(void) {
@@ -265,17 +265,17 @@ void areceive_test01(void) {
 }
 
 void areceive_test(void) {
-    kprintf("======================Start Testing=====================\r\n");
+  kprintf("======================Start Testing=====================\r\n");
 	kprintf("Test1:\r\n");
 	areceive_test01();	//1 send, 1 receiver
-    kprintf("======================End of Test=====================\r\n");
+  kprintf("======================End of Test=====================\r\n");
 }
-*/
+
 
 int main(int argc, char **argv) {
   kprintf("Start Testing\r\n");
-	blocksending_test();
-	//areceive_test();
+	//blocksending_test();
+	areceive_test();
   kprintf("End\r\n");
 	return OK;
 }

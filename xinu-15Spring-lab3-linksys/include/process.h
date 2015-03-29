@@ -66,6 +66,9 @@ struct procent {		/* entry in the process table		*/
 	qid16	receivelist;	/* index of ready list		*/
 	umsg32 	sndmsg; 		/* msg that is trying to be sent but cant */ 
 	char 	sndflag; 		/* TRUE - something is stored to be sent */
+ 
+	int 	(* func)(void); /* Async func pointer to function that called */
+	umsg32 	*abuf; 			/* message buffer.  */ 
 
 };
 
