@@ -274,7 +274,7 @@ void areceive_test(void) {
 
 int main(int argc, char **argv) {
   kprintf("Start Testing\r\n");
-	//blocksending_test();
+	blocksending_test();
 	areceive_test();
   kprintf("End\r\n");
 	return OK;
