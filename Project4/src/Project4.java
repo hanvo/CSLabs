@@ -5,10 +5,26 @@ import java.sql.*;
 public class Project4 {
 	static Scanner scan;
 	static File file;
-	static Connection conn;
+	boolean isAdmin = false;
+	Connection conn;
+	
+	static int roleID = 2;
 	
 
-	
+	public Project4(){
+		try {
+			Class.forName( "oracle.jdbc.driver.OracleDriver" );
+		}
+		catch ( ClassNotFoundException e ) {
+			e.printStackTrace();
+		}
+		try {
+			conn = DriverManager.getConnection( "jdbc:oracle:thin:@claros.cs.purdue.edu:1524:strep","phand", "aWKd9gtk" );
+		}
+		catch ( SQLException e ){
+			e.printStackTrace();
+		}
+	}
 	
 	public static String VigEncrypt(String plain, String key){
 		String kprime = "";
@@ -95,64 +111,114 @@ public class Project4 {
 		return plain;
 	}
 	
-	public static void InputFile(String fp){
+	public void InputFile(String fp){
 		String filename = fp;
+		boolean loginSuccessful;
+		filename = "/Users/QuakeZ/Desktop/CSLabs/Project4/src/input.txt";
         file = new File( filename );
         try { 
         	scan = new Scanner( file );
+        	while(scan.hasNext()){
+        		String line = scan.nextLine();
+        		String[] commands = line.split(" ");
+        			
+        		switch (commands[0]) {
+        			case "LOGIN":
+        				do{
+        					//System.out.println("Login Procedure");
+        					String userName = commands[1];
+        					String pass = commands[2];
+        					loginSuccessful= loginCheck(userName, pass);
+        					if(loginSuccessful)
+        						System.out.println("Login successful");
+        					else
+        						System.out.println("Invalid login");
+        				} while(!loginSuccessful);
+        				break;
+        			case "CREATE":
+        				//System.out.println("Create Procedure");
+        				switch (commands[1]){
+        					case "USER":
+        						//System.out.println("USER");
+        						break;
+        					case "ROLE":
+        						System.out.println("ROLE");
+        						String roleName = commands[2];
+        						String encKey = commands[3];
+        						boolean roleCreationSucc = createRole(roleName,encKey);
+        						if(roleCreationSucc)
+        							System.out.println("Role created successfully");
+        						break;
+        				}
+        				break;
+        		}	
+        	}
         } 
         catch ( FileNotFoundException e ){
             System.out.println(e);
         }
+        scan.close();
+	}
+	
+	public boolean loginCheck(String user, String pass)
+	{
+		boolean ret = false;
+		String query = "SELECT * FROM users WHERE (USERNAME = \'" + user + "\' AND PASSWORD = \'" + pass + "\')";
+		//System.out.println(query);
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery( query );
+			if(rs.next()) {
+				String account = rs.getString("USERNAME");
+				if(account.equals("admin"))
+					isAdmin = true;
+				ret = true;
+			}
+			rs.close();
+			stmt.close();
+		}
+		catch ( SQLException e ) {
+			e.printStackTrace();
+		}		
+		return ret;
 	}
 
-	public static void Database(){
-		try {
-			Class.forName( "oracle.jdbc.driver.OracleDriver" );
+	public boolean createRole(String roleName, String encKey)
+	{
+		boolean ret = false;
+		if(isAdmin)
+		{
+			System.out.println("Admin Status");
+			
+			String query = "INSERT INTO Roles VALUES(" + roleID + "," + "\'" + roleName + "\', \'" + encKey + "\')"; 
+			System.out.println(query);
+			try {
+				Statement stmt = conn.createStatement();
+				stmt.executeUpdate( query );
+				stmt.close();
+			}
+			catch ( SQLException e ) {
+				System.out.println(e);
+			}
+			roleID++;
+			ret = true;
 		}
-		catch ( ClassNotFoundException e ) {
-			e.printStackTrace();
-		}
-		try {
-			conn = DriverManager.getConnection( "jdbc:oracle:thin:@claros.cs.purdue.edu:1524:strep","phand", "aWKd9gtk" );
-		}
-		catch ( SQLException e ){
-			e.printStackTrace();
-		}
+		else
+			System.out.println("Authorization failure");
+		
+		return ret;
 	}
 	
-	
-	
 	public static void main(String[] args) {		
-		if ( args.length < 1 ) {
+		//need to change this once i get project finish. change to unix 
+		Project4 p4 = new Project4();
+		
+		if ( args.length < -1 ) {
             System.out.println("Need an input file");
             return;
         }
 		else{
-			InputFile(args[0]);
-			Database();
-			int x;
-			
-			while(scan.hasNext()){
-				String line = scan.nextLine();
-				String inputSplit[] = line.split("\\s+");
-				 switch (inputSplit[0]) {
-		            case "LOGIN":  
-		            	System.out.println("Login");
-		            default:
-		            	System.out.println("End");
-				 }
-
-			}
-
-			
-			
-			
-            System.out.println("EOF"); 
-			scan.close();
-
+			p4.InputFile("arg");
 		}
-		
 	}
-
 }
