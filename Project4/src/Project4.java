@@ -1,6 +1,15 @@
+import java.io.*;
+import java.util.*;
+import java.sql.*;
 
 public class Project4 {
+	static Scanner scan;
+	static File file;
+	static Connection conn;
+	
 
+	
+	
 	public static String VigEncrypt(String plain, String key){
 		String kprime = "";
 		String cipher = "";
@@ -86,9 +95,64 @@ public class Project4 {
 		return plain;
 	}
 	
-	public static void main(String[] args) {
-		System.out.println(VigEncrypt("BEWARETHEJABBERWOCKMYSONTHEJAWSTHATBITETHECLAWSTHATCATCH","VIGENERECIPHER"));
-		System.out.println(VigDecrypt("WMCEEIKLGRPIFVMEUGXQPWQVIOIAVEYXUEKFKBTALVXTGAFXYEVKPAGY", "VIGENERECIPHER"));
+	public static void InputFile(String fp){
+		String filename = fp;
+        file = new File( filename );
+        try { 
+        	scan = new Scanner( file );
+        } 
+        catch ( FileNotFoundException e ){
+            System.out.println(e);
+        }
+	}
+
+	public static void Database(){
+		try {
+			Class.forName( "oracle.jdbc.driver.OracleDriver" );
+		}
+		catch ( ClassNotFoundException e ) {
+			e.printStackTrace();
+		}
+		try {
+			conn = DriverManager.getConnection( "jdbc:oracle:thin:@claros.cs.purdue.edu:1524:strep","phand", "aWKd9gtk" );
+		}
+		catch ( SQLException e ){
+			e.printStackTrace();
+		}
+	}
+	
+	
+	
+	public static void main(String[] args) {		
+		if ( args.length < 1 ) {
+            System.out.println("Need an input file");
+            return;
+        }
+		else{
+			InputFile(args[0]);
+			Database();
+			int x;
+			
+			while(scan.hasNext()){
+				String line = scan.nextLine();
+				String inputSplit[] = line.split("\\s+");
+				 switch (inputSplit[0]) {
+		            case "LOGIN":  
+		            	System.out.println("Login");
+		            default:
+		            	System.out.println("End");
+				 }
+
+			}
+
+			
+			
+			
+            System.out.println("EOF"); 
+			scan.close();
+
+		}
+		
 	}
 
 }
