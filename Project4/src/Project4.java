@@ -173,8 +173,23 @@ public class Project4 {
     							break;
     						case "PRIVILEGE":
     							System.out.println("Granting Privilege");
+    							String privName = commands[2];
+    							String roleName = commands[4];
+    							String tableName = commands[6];
+    							boolean grantPrivSucc = grantPriv(privName,roleName,tableName);
+    							if(grantPrivSucc)
+    								System.out.println("Privilege granted successfully");    								
     							break;
         				}
+        				break;
+        			case "REVOKE":
+        				System.out.println("Revoking");
+        				String privName = commands[2];
+        				String roleName = commands[4];
+        				String tableName = commands[6];
+        				boolean revokeSucc = revoke(privName, roleName, tableName);
+        				if(revokeSucc)
+        					System.out.println("Privilege revoked successfully");
         				break;
         				
         		}	
@@ -198,6 +213,8 @@ public class Project4 {
 				String account = rs.getString("USERNAME");
 				if(account.equals("admin"))
 					isAdmin = true;
+				else
+					isAdmin = false;
 				ret = true;
 			}
 			rs.close();
@@ -284,6 +301,61 @@ public class Project4 {
 		return ret;
 	}
 	
+	public boolean grantPriv(String privName, String roleName, String tableName)
+	{
+		boolean ret = false;
+		if(isAdmin){
+			System.out.println("Admin power");
+			int roleNum = getRoleNum(roleName);
+			int privNum = getPrivNum(privName);
+			
+			String update = "INSERT INTO RolePrivileges values(" + roleNum + ",'" + tableName +"'," + privNum +")";
+			System.out.println(update);
+			try {
+				Statement stmt = conn.createStatement();
+				stmt.executeUpdate( update );
+				stmt.close();
+			}
+			catch ( SQLException e ) {
+				System.out.println(e);
+			}
+			ret = true;
+		}
+		else{
+			System.out.println("Authorization failure");
+		}
+		return ret;
+		
+	}
+	
+	public boolean revoke(String privName, String roleName, String tableName)
+	{
+		boolean ret = false;
+		if(isAdmin){
+			System.out.println("Admin power");
+			int roleNum = getRoleNum(roleName);
+			int privNum = getPrivNum(privName);
+
+			
+			String update = "DELETE FROM roleprivileges WHERE RoleId = " + roleNum + " AND TableName = \'" + tableName + 
+					"\' AND PrivID = " + privNum;
+			System.out.println(update);
+			try {
+				Statement stmt = conn.createStatement();
+				stmt.executeUpdate( update );
+				stmt.close();
+			}
+			catch ( SQLException e ) {
+				System.out.println(e);
+			}
+			ret = true;
+		}
+		else{
+			System.out.println("Authorization failure");
+		}
+		return ret;
+	}
+	
 	public int getUserID(String user)
 	{
 		String userid = "";
@@ -323,6 +395,49 @@ public class Project4 {
 			e.printStackTrace();
 		}
 		id = Integer.parseInt(roleid);
+		return id;
+	}
+	
+	public int getRoleNum(String roleName)
+	{
+		String roleID = "";
+		int id = -1;
+		String query = "SELECT RoleId FROM Roles WHERE rolename=\'" + roleName + "\'";
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery( query );
+			while(rs.next()){
+				roleID = rs.getString("ROLEID");
+			}
+			rs.close();
+			stmt.close();
+		}
+		catch ( SQLException e ) {
+			e.printStackTrace();
+		}
+		id = Integer.parseInt(roleID);
+		return id;
+		
+	}
+	
+	public int getPrivNum(String privName)
+	{
+		String privID = "";
+		int id = -1;
+		String query = "SELECT PrivId FROM Privileges WHERE PrivName=\'" + privName + "\'";
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery( query );
+			while(rs.next()){
+				privID = rs.getString("PRIVID");
+			}
+			rs.close();
+			stmt.close();
+		}
+		catch ( SQLException e ) {
+			e.printStackTrace();
+		}
+		id = Integer.parseInt(privID);
 		return id;
 	}
 	
