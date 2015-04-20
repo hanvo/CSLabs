@@ -137,7 +137,7 @@ public class Project4 {
         						System.out.println("Login successful");
         					else
         						System.out.println("Invalid login");
-        				} while(!loginSuccessful);
+        				} while(!loginSuccessful && scan.hasNext());
         				break;
         			case "CREATE":
         				//System.out.println("Create Procedure");
@@ -157,9 +157,26 @@ public class Project4 {
         						boolean roleCreationSucc = createRole(roleName,encKey);
         						if(roleCreationSucc)
         							System.out.println("Role created successfully");
-        						break;
+        						break;        						
         				}
         				break;
+        			case "GRANT":
+        				System.out.println("Grant Procedure");
+        				switch (commands[1]){
+    						case "ROLE":
+    							System.out.println("Granting Role");
+    							String grantUser = commands[2];
+    							String grantRole = commands[3];
+    							boolean grantRoleSucc = grantRole(grantUser,grantRole);
+    							if(grantRoleSucc)
+    								System.out.println("Role assigned successfully");
+    							break;
+    						case "PRIVILEGE":
+    							System.out.println("Granting Privilege");
+    							break;
+        				}
+        				break;
+        				
         		}	
         	}
         } 
@@ -223,7 +240,7 @@ public class Project4 {
 		boolean ret = false;
 		if(isAdmin) {
 			System.out.println("Granted");
-			String query = "INSERT INTO Users VALUES(" + roleID + "," + "\'" + username + "\', \'" + password + "\')"; 
+			String query = "INSERT INTO Users VALUES(" + userID + "," + "\'" + username + "\', \'" + password + "\')"; 
 			System.out.println(query);
 			try {
 				Statement stmt = conn.createStatement();
@@ -233,13 +250,80 @@ public class Project4 {
 			catch ( SQLException e ) {
 				System.out.println(e);
 			}
-			roleID++;			
+			userID++;			
 			ret = true;	
 		}
 		else {
 			System.out.println("Authorization failure");
 		}
 		return ret;
+	}
+	
+	public boolean grantRole(String grantUser, String grantRoleName){
+		boolean ret = false;
+		if(isAdmin){
+			System.out.println("Admin Status");
+			int user = getUserID(grantUser);
+			int role = getRoleID(grantRoleName);
+			
+			String update = "INSERT INTO userroles VALUES(" + user + "," + role + ")";
+			System.out.println(update);
+			try {
+				Statement stmt = conn.createStatement();
+				stmt.executeUpdate( update );
+				stmt.close();
+			}
+			catch ( SQLException e ) {
+				System.out.println(e);
+			}
+			ret = true;
+		}
+		else {
+			System.out.println("Authorization failure");
+		}
+		return ret;
+	}
+	
+	public int getUserID(String user)
+	{
+		String userid = "";
+		int id = -1;
+		String query = "SELECT userid FROM users WHERE UserName=\'" + user + "\'";
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery( query );
+			while(rs.next()){
+				userid = rs.getString("USERID");
+			}
+			rs.close();
+			stmt.close();
+		}
+		catch ( SQLException e ) {
+			e.printStackTrace();
+		}
+		id = Integer.parseInt(userid);
+		return id;
+		
+	}
+	
+	public int getRoleID(String role){
+		String roleid = "";
+		int id = -1;
+		String query = "SELECT roleid FROM roles WHERE RoleName=\'" + role + "\'";
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery( query );
+			while(rs.next()){
+				roleid = rs.getString("ROLEID");
+			}
+			rs.close();
+			stmt.close();
+		}
+		catch ( SQLException e ) {
+			e.printStackTrace();
+		}
+		id = Integer.parseInt(roleid);
+		return id;
 	}
 	
 	
