@@ -9,6 +9,10 @@ public class Project4 {
 	Connection conn;
 	
 	static int roleID = 2;
+	static int userID = 2; 
+	
+	
+	
 	
 
 	public Project4(){
@@ -139,7 +143,12 @@ public class Project4 {
         				//System.out.println("Create Procedure");
         				switch (commands[1]){
         					case "USER":
-        						//System.out.println("USER");
+        						System.out.println("USER");
+        						String username = commands[2];
+        						String password = commands[3];
+        						boolean userCreationSucc = createUser(username,password);
+        						if(userCreationSucc)
+        							System.out.println("User created successfully");        						
         						break;
         					case "ROLE":
         						System.out.println("ROLE");
@@ -191,7 +200,7 @@ public class Project4 {
 			System.out.println("Admin Status");
 			
 			String query = "INSERT INTO Roles VALUES(" + roleID + "," + "\'" + roleName + "\', \'" + encKey + "\')"; 
-			System.out.println(query);
+			//System.out.println(query);
 			try {
 				Statement stmt = conn.createStatement();
 				stmt.executeUpdate( query );
@@ -208,6 +217,32 @@ public class Project4 {
 		
 		return ret;
 	}
+
+	public boolean createUser(String username, String password)
+	{
+		boolean ret = false;
+		if(isAdmin) {
+			System.out.println("Granted");
+			String query = "INSERT INTO Users VALUES(" + roleID + "," + "\'" + username + "\', \'" + password + "\')"; 
+			System.out.println(query);
+			try {
+				Statement stmt = conn.createStatement();
+				stmt.executeUpdate( query );
+				stmt.close();
+			}
+			catch ( SQLException e ) {
+				System.out.println(e);
+			}
+			roleID++;			
+			ret = true;	
+		}
+		else {
+			System.out.println("Authorization failure");
+		}
+		return ret;
+	}
+	
+	
 	
 	public static void main(String[] args) {		
 		//need to change this once i get project finish. change to unix 
