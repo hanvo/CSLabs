@@ -256,6 +256,42 @@ public class Project4 {
         							break;
         						case "Course":
         							System.out.println("Course");
+        							boolean insertCourseSucc = false;
+        							String courseName = commands[4];
+        							String dname = commands[5];
+        							String des = commands[6];
+        							String textbook = commands[7];        							
+        							ownerRoleId = getRoleID(commands[11]);
+        							encryptedCol = Integer.parseInt(commands[10]);
+        							
+        							if(encryptedCol > 0)
+        							{
+        								String key = findEncryptKey(ownerRoleId);
+        								if(encryptedCol== 1) {
+        									System.out.println("CourseName");
+        									String encryptStringCName = VigEncrypt(courseName, key);
+            								insertCourseSucc = insertCourse(encryptStringCName,dname, des, textbook, encryptedCol, ownerRoleId);
+        									
+        								} else if (encryptedCol== 2) {
+        									System.out.println("Dept Name");
+        									String encryptStringDName = VigEncrypt(dname, key);
+            								insertCourseSucc = insertCourse(courseName, encryptStringDName, des, textbook, encryptedCol, ownerRoleId);
+        									
+        								} else if (encryptedCol== 3) {
+        									System.out.println("Course Descipt");
+        									String encryptStringCDes = VigEncrypt(des, key);
+            								insertCourseSucc = insertCourse(courseName, dname, encryptStringCDes, textbook, encryptedCol, ownerRoleId);
+        									
+        								} else if (encryptedCol== 4) {
+        									System.out.println("Textbook");
+        									String encryptStringtext = VigEncrypt(des, key);
+            								insertCourseSucc = insertCourse(courseName, dname, des, encryptStringtext, encryptedCol, ownerRoleId);
+        								}
+        							} else {
+        								insertCourseSucc = insertCourse(courseName, dname, des, textbook, encryptedCol, ownerRoleId);
+        							}
+        							if(insertCourseSucc)
+        								System.out.println("Row inserted successfully");				
         							break;
         					}					
         				}
@@ -607,6 +643,27 @@ public class Project4 {
 		
 		String query = "INSERT INTO Student VALUES(\'" + studentName  + "\'," + "\'" + level + "\', " + encryptedCol  + ", " + ownerRoleId + ")"; 
 		System.out.println(query);
+		try {
+			Statement stmt = conn.createStatement();
+			stmt.executeUpdate( query );
+			stmt.close();
+		}
+		catch ( SQLException e ) {
+			System.out.println(e);
+		}
+		ret = true;
+		
+		return ret;
+	}
+	
+	public boolean insertCourse(String courseName, String dname, String des, String textbook, int encryptedCol, int ownerRoleId)
+	{
+		boolean ret = false;
+		
+		String query = "INSERT INTO Course VALUES(\'" + courseName  + "\'," + "\'" + dname + "\', \'"  +  des + "\', \'" + textbook
+				+ "\', " + encryptedCol  + ", " + ownerRoleId + ")"; 
+		System.out.println(query);
+				
 		try {
 			Statement stmt = conn.createStatement();
 			stmt.executeUpdate( query );
