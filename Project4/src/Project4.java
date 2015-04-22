@@ -3,15 +3,15 @@ import java.util.*;
 import java.sql.*;
 
 public class Project4 {
-	static Scanner scan;
-	static File file;
+	Scanner scan;
+	File file;
 	boolean isAdmin = false;
 	Connection conn;
 	
-	static int roleID = 2;
-	static int userID = 2; 
+	static int roleIDStatic = 2;
+	static int userIDStatic = 2; 
 	
-	
+	String currentUser;
 	
 	
 
@@ -124,7 +124,7 @@ public class Project4 {
         	scan = new Scanner( file );
         	while(scan.hasNext()){
         		String line = scan.nextLine();
-        		String[] commands = line.split(" ");
+        		String[] commands = line.split("\\W");
         			
         		switch (commands[0]) {
         			case "LOGIN":
@@ -132,9 +132,12 @@ public class Project4 {
         					//System.out.println("Login Procedure");
         					String userName = commands[1];
         					String pass = commands[2];
-        					loginSuccessful= loginCheck(userName, pass);
-        					if(loginSuccessful)
+        					loginSuccessful = loginCheck(userName, pass);
+        					if(loginSuccessful){
+        						currentUser = userName;
         						System.out.println("Login successful");
+        						System.out.println("LOGIN: " + currentUser);
+        					}
         					else
         						System.out.println("Invalid login");
         				} while(!loginSuccessful && scan.hasNext());
@@ -191,6 +194,53 @@ public class Project4 {
         				if(revokeSucc)
         					System.out.println("Privilege revoked successfully");
         				break;
+        			case "INSERT":
+        				System.out.println("Inserting");
+        				String privType = commands[0];
+        				String table = commands[2];
+        				boolean checkPermissions = checkUserPriv(currentUser,privType,table);
+        				if(checkPermissions) { 
+        					switch (table){
+        						case "Department":
+        							System.out.println("Department");
+        							boolean insertDeptSucc = false;
+        							String deptName = commands[4];
+        							String location = commands[5];
+        							int ownerRoleId = getRoleID(commands[9]);
+        							int encryptedCol = Integer.parseInt(commands[8]);
+        							if(encryptedCol > 0)
+        							{
+        								String key = findEncryptKey(ownerRoleId);
+        								if(encryptedCol == 1){
+        									System.out.println("DeptName");
+        									String encryptStringDept = VigEncrypt(deptName, key);
+            								insertDeptSucc = insertDepartment(encryptStringDept,location,encryptedCol,ownerRoleId);
+        								}
+        								else{
+        									System.out.println("Location");
+        									String encryptStringLoc = VigEncrypt(location, key);
+            								insertDeptSucc = insertDepartment(deptName,encryptStringLoc,encryptedCol,ownerRoleId);
+        								}
+        							}
+        							if(insertDeptSucc)
+        								System.out.println("Row inserted successfully");
+        							break;
+        						case "Student":
+        							System.out.println("Student");
+        							break;
+        						case "Course":
+        							System.out.println("Course");
+        							break;
+        					}
+        					
+        					
+        					
+        					
+        				}
+        				else {
+        					System.out.println("Authorization failure");
+        				}
+        				break;
         				
         		}	
         	}
@@ -233,7 +283,7 @@ public class Project4 {
 		{
 			System.out.println("Admin Status");
 			
-			String query = "INSERT INTO Roles VALUES(" + roleID + "," + "\'" + roleName + "\', \'" + encKey + "\')"; 
+			String query = "INSERT INTO Roles VALUES(" + roleIDStatic + "," + "\'" + roleName + "\', \'" + encKey + "\')"; 
 			//System.out.println(query);
 			try {
 				Statement stmt = conn.createStatement();
@@ -243,7 +293,7 @@ public class Project4 {
 			catch ( SQLException e ) {
 				System.out.println(e);
 			}
-			roleID++;
+			roleIDStatic++;
 			ret = true;
 		}
 		else
@@ -257,7 +307,7 @@ public class Project4 {
 		boolean ret = false;
 		if(isAdmin) {
 			System.out.println("Granted");
-			String query = "INSERT INTO Users VALUES(" + userID + "," + "\'" + username + "\', \'" + password + "\')"; 
+			String query = "INSERT INTO Users VALUES(" + userIDStatic + "," + "\'" + username + "\', \'" + password + "\')"; 
 			System.out.println(query);
 			try {
 				Statement stmt = conn.createStatement();
@@ -267,7 +317,7 @@ public class Project4 {
 			catch ( SQLException e ) {
 				System.out.println(e);
 			}
-			userID++;			
+			userIDStatic++;			
 			ret = true;	
 		}
 		else {
@@ -356,6 +406,35 @@ public class Project4 {
 		return ret;
 	}
 	
+	public boolean checkUserPriv(String user, String privType, String tableName)
+	{
+		boolean ret = false;
+		int userNum = getUserID(user);
+		int privNum = getPrivNum(privType);
+		
+		ArrayList<Integer> roleNum = getRoleID(userNum);
+		for(int x = 0; x < roleNum.size(); x++) {
+			String query = "SELECT * FROM RolePrivileges WHERE (RoleID = " + roleNum.get(x) + " AND TableName = \'" + tableName + "\' AND PrivID = " +
+					privNum + ")";
+				//System.out.println(query); 
+				
+				try {
+					Statement stmt = conn.createStatement();
+					ResultSet rs = stmt.executeQuery( query );
+					if(rs.next()) {	
+						//System.out.println("Query:" + x);
+						ret = true;
+					}
+					rs.close();
+					stmt.close();
+				}
+				catch ( SQLException e ) {
+					e.printStackTrace();
+				}		
+		}
+		return ret;
+	}
+	
 	public int getUserID(String user)
 	{
 		String userid = "";
@@ -396,6 +475,29 @@ public class Project4 {
 		}
 		id = Integer.parseInt(roleid);
 		return id;
+	}
+	
+	public ArrayList<Integer> getRoleID(int userNum)
+	{
+		String roleid = "";
+		int id = -1;
+		ArrayList<Integer> ret = new ArrayList<Integer>();
+		String query = "SELECT roleid FROM UserRoles WHERE UserID=" + userNum ;
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery( query );
+			while(rs.next()){
+				roleid = rs.getString("ROLEID");
+				id = Integer.parseInt(roleid);
+				ret.add(id);
+			}
+			rs.close();
+			stmt.close();
+		}
+		catch ( SQLException e ) {
+			e.printStackTrace();
+		}
+		return ret;
 	}
 	
 	public int getRoleNum(String roleName)
@@ -441,6 +543,43 @@ public class Project4 {
 		return id;
 	}
 	
+	public String findEncryptKey(int roleID)
+	{
+		String ret = "";
+		String query = "SELECT EncryptionKey FROM roles WHERE RoleID=\'" + roleID + "\'";
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery( query );
+			while(rs.next()){
+				ret = rs.getString("ENCRYPTIONKEY");
+			}
+			rs.close();
+			stmt.close();
+		}
+		catch ( SQLException e ) {
+			e.printStackTrace();
+		}
+		return ret;
+	}
+	
+	public boolean insertDepartment(String dname, String location, int encrpytedColumn, int ownerId){
+		boolean ret = false;
+			
+		String query = "INSERT INTO Department VALUES(\'" + dname  + "\'," + "\'" + location + "\', " + encrpytedColumn  + ", " + ownerId + ")"; 
+		System.out.println(query);
+		try {
+			Statement stmt = conn.createStatement();
+			stmt.executeUpdate( query );
+			stmt.close();
+		}
+		catch ( SQLException e ) {
+			System.out.println(e);
+		}
+		ret = true;
+		
+		return ret;
+	}
+
 	
 	
 	public static void main(String[] args) {		
