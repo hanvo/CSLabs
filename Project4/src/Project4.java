@@ -221,27 +221,48 @@ public class Project4 {
         									String encryptStringLoc = VigEncrypt(location, key);
             								insertDeptSucc = insertDepartment(deptName,encryptStringLoc,encryptedCol,ownerRoleId);
         								}
-        							}
+        							} else {
+        								insertDeptSucc = insertDepartment(deptName,location,encryptedCol,ownerRoleId);
+        							}        					
         							if(insertDeptSucc)
         								System.out.println("Row inserted successfully");
         							break;
         						case "Student":
         							System.out.println("Student");
+        							boolean insertStudentSucc = false;
+        							String studentName = commands[4];
+        							String level = commands[5];
+        							ownerRoleId = getRoleID(commands[9]);
+        							encryptedCol = Integer.parseInt(commands[8]);
+        							
+        							if(encryptedCol > 0)
+        							{
+        								String key = findEncryptKey(ownerRoleId);
+        								if(encryptedCol == 1){
+        									System.out.println("StudentName");
+        									String encryptStringName = VigEncrypt(studentName, key);
+            								insertStudentSucc = insertStudent(encryptStringName,level,encryptedCol,ownerRoleId);
+        								}
+        								else{
+        									System.out.println("Level");
+        									String encryptStringLevel = VigEncrypt(level, key);
+            								insertStudentSucc = insertStudent(studentName,encryptStringLevel,encryptedCol,ownerRoleId);
+        								}
+        							} else {
+        								insertStudentSucc = insertStudent(studentName,level,encryptedCol,ownerRoleId);
+        							}        		
+        							if(insertStudentSucc)
+        								System.out.println("Row inserted successfully");
         							break;
         						case "Course":
         							System.out.println("Course");
         							break;
-        					}
-        					
-        					
-        					
-        					
+        					}					
         				}
         				else {
         					System.out.println("Authorization failure");
         				}
         				break;
-        				
         		}	
         	}
         } 
@@ -562,10 +583,10 @@ public class Project4 {
 		return ret;
 	}
 	
-	public boolean insertDepartment(String dname, String location, int encrpytedColumn, int ownerId){
+	public boolean insertDepartment(String dname, String location, int encryptedCol, int ownerId){
 		boolean ret = false;
 			
-		String query = "INSERT INTO Department VALUES(\'" + dname  + "\'," + "\'" + location + "\', " + encrpytedColumn  + ", " + ownerId + ")"; 
+		String query = "INSERT INTO Department VALUES(\'" + dname  + "\'," + "\'" + location + "\', " + encryptedCol  + ", " + ownerId + ")"; 
 		System.out.println(query);
 		try {
 			Statement stmt = conn.createStatement();
@@ -580,6 +601,25 @@ public class Project4 {
 		return ret;
 	}
 
+	public boolean insertStudent(String studentName,String level, int encryptedCol, int ownerRoleId)
+	{
+		boolean ret = false;
+		
+		String query = "INSERT INTO Student VALUES(\'" + studentName  + "\'," + "\'" + level + "\', " + encryptedCol  + ", " + ownerRoleId + ")"; 
+		System.out.println(query);
+		try {
+			Statement stmt = conn.createStatement();
+			stmt.executeUpdate( query );
+			stmt.close();
+		}
+		catch ( SQLException e ) {
+			System.out.println(e);
+		}
+		ret = true;
+		
+		return ret;
+	}
+	
 	
 	
 	public static void main(String[] args) {		
