@@ -116,10 +116,8 @@ public class Project4 {
 	}
 	
 	public void InputFile(String fp){
-		String filename = fp;
 		boolean loginSuccessful;
-		filename = "/Users/QuakeZ/Desktop/CSLabs/Project4/src/input.txt";
-        file = new File( filename );
+        file = new File( fp );
         try { 
         	scan = new Scanner( file );
         	while(scan.hasNext()){
@@ -713,8 +711,8 @@ public class Project4 {
 		catch ( SQLException e ) {
 			e.printStackTrace();
 		}
-		//if(results)
-		printTable(tableName, Integer.parseInt(roleId));
+		if(results)
+			printTable(tableName, Integer.parseInt(roleId));
 		
 	}
 	
@@ -844,16 +842,23 @@ public class Project4 {
 		}	
 	}
 
-	public static void main(String[] args) {		
-		//need to change this once i get project finish. change to unix 
+	public static void main(String[] args) 
+	{		
+		
+		String input = args[0];
+		String output = args[1];
+		String FP = System.getProperty("user.dir") + "/" + input;
+
 		Project4 p4 = new Project4();
 		
-		if ( args.length < -1 ) {
-            System.out.println("Need an input file");
-            return;
-        }
-		else{
-			p4.InputFile("arg");
+		try {
+		    FileOutputStream f = new FileOutputStream(output);
+			System.setOut(new PrintStream(f));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
 		}
+		
+		
+		p4.InputFile(FP);
 	}	
 }

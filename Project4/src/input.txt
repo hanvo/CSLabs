@@ -1,4 +1,0 @@
-LOGIN USER4 PASS4
-SELECT * FROM Course
-SELECT * FROM Department
-SELECT * FROM Student
