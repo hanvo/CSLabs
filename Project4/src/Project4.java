@@ -299,6 +299,32 @@ public class Project4 {
         					System.out.println("Authorization failure");
         				}
         				break;
+        			case "SELECT":
+        				System.out.println("SELECT");
+        				privType = commands[0];
+        				table = commands[4];
+        				
+        				if(!checkUserPriv(currentUser, privType, table)) {
+        					System.out.println("Authorization failure");
+        					break;
+        				}        				
+        				
+        				int roleValue = checkSelect(privType, table);
+        				if(roleValue != -1)
+        				{
+        					String decryptKey = getEncrypKey(roleValue);
+        					System.out.println(decryptKey);
+        					
+        					
+        				} else {
+        					System.out.println("Print with encryption");
+        				}
+        					
+        				System.exit(0);        				
+        				break;
+        				
+        			case "QUIT":
+        				return;
         		}	
         	}
         } 
@@ -677,6 +703,76 @@ public class Project4 {
 		return ret;
 	}
 	
+	public int checkSelect(String privType, String tableName)
+	{
+		int privId = getPrivNum(privType);
+		int currUserId = getUserID(currentUser);
+		
+		String roleId = "";
+		String query = "SELECT roleid FROM RolePrivileges WHERE PrivId = " + privId + " AND TableName = \'" + tableName + "\'";
+		System.out.println(query);
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery( query );
+			while(rs.next()){
+				roleId = rs.getString("RoleId");
+				boolean results = CheckUserRoles(currUserId,Integer.parseInt(roleId));
+				if(results)
+					return Integer.parseInt(roleId);
+			}
+			rs.close();
+			stmt.close();
+		}
+		catch ( SQLException e ) {
+			e.printStackTrace();
+		}
+
+		return -1; 
+	}
+	
+	
+	public boolean CheckUserRoles(int currUserId, int roleId)
+	{
+		boolean ret = false;
+		
+		String query = "SELECT UserId FROM UserRoles WHERE UserID = " + currUserId + " AND RoleID = " + roleId;
+		System.out.println(query);
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery( query );
+			if(rs.next()){
+				ret = true;
+			}
+			rs.close();
+			stmt.close();
+		}
+		catch ( SQLException e ) {
+			e.printStackTrace();
+		}
+
+		return ret;
+	}
+	
+	public String getEncrypKey(int roleValue)
+	{
+		String ret = "";
+		
+		String query = "SELECT EncryptionKey FROM Roles WHERE RoleID = " + roleValue;
+		System.out.println(query);
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery( query );
+			if(rs.next()){
+				ret = rs.getString("EncryptionKey");
+			}
+			rs.close();
+			stmt.close();
+		}
+		catch ( SQLException e ) {
+			e.printStackTrace();
+		}
+		return ret;
+	}
 	
 	
 	public static void main(String[] args) {		
