@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.*;
+import java.security.interfaces.RSAKey;
 import java.sql.*;
 
 public class Project4 {
@@ -305,20 +306,11 @@ public class Project4 {
         				table = commands[4];
         				
         				if(!checkUserPriv(currentUser, privType, table)) {
-        					System.out.println("Authorization failure");
+        					System.out.println("Authorization failure 1");
         					break;
         				}        				
         				
-        				int roleValue = checkSelect(privType, table);
-        				if(roleValue != -1)
-        				{
-        					String decryptKey = getEncrypKey(roleValue);
-        					System.out.println(decryptKey);
-        					
-        					
-        				} else {
-        					System.out.println("Print with encryption");
-        				}
+        				checkSelect(privType, table);
         					
         				System.exit(0);        				
         				break;
@@ -710,7 +702,7 @@ public class Project4 {
 		
 		String roleId = "";
 		String query = "SELECT roleid FROM RolePrivileges WHERE PrivId = " + privId + " AND TableName = \'" + tableName + "\'";
-		System.out.println(query);
+		//System.out.println(query);
 		try {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery( query );
@@ -718,7 +710,10 @@ public class Project4 {
 				roleId = rs.getString("RoleId");
 				boolean results = CheckUserRoles(currUserId,Integer.parseInt(roleId));
 				if(results)
-					return Integer.parseInt(roleId);
+				{
+					printTable(tableName, Integer.parseInt(roleId));
+
+				}
 			}
 			rs.close();
 			stmt.close();
@@ -735,8 +730,8 @@ public class Project4 {
 	{
 		boolean ret = false;
 		
-		String query = "SELECT UserId FROM UserRoles WHERE UserID = " + currUserId + " AND RoleID = " + roleId;
-		System.out.println(query);
+		String query = "SELECT userid FROM UserRoles WHERE UserID = " + currUserId + " AND RoleID = " + roleId;
+		//System.out.println(query);
 		try {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery( query );
@@ -758,7 +753,7 @@ public class Project4 {
 		String ret = "";
 		
 		String query = "SELECT EncryptionKey FROM Roles WHERE RoleID = " + roleValue;
-		System.out.println(query);
+		//System.out.println(query);
 		try {
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery( query );
@@ -774,6 +769,89 @@ public class Project4 {
 		return ret;
 	}
 	
+	public void printTable(String table, int roleID)
+	{
+		String query = "SELECT * FROM " + table;
+		try{
+			Statement st = conn.createStatement();
+			ResultSet rset = st.executeQuery(query);
+			ResultSetMetaData md = rset.getMetaData();
+			for (int i=1; i<=md.getColumnCount() - 2; i++) {
+				if(i == md.getColumnCount() - 2)
+					System.out.print(md.getColumnLabel(i));
+				else
+					System.out.print(md.getColumnLabel(i) + ", ");
+			} 
+			System.out.println("");
+			
+			while(rset.next()){
+				
+				if(table.equals("Department")){
+					String dname = rset.getString("DNAME");
+					String location = rset.getString("location");
+					String col = rset.getString("ENCRYPTEDCOLUMN");	
+					String roleIDtemp = rset.getString("OWNERROLE");
+					
+					if(Integer.parseInt(roleIDtemp) == roleID)
+					{
+						String key = getEncrypKey(roleID);
+						//System.out.println(key);
+						if(Integer.parseInt(col) == 1) {
+							System.out.println(VigDecrypt(dname, key) + ", " + location);
+						} else if (Integer.parseInt(col) == 2) {
+							System.out.println(dname + ", " + VigDecrypt(location, key));
+						}
+					} else{
+						System.out.println(dname + ", " + location);
+					}
+				} else if(table.equals("Student")) {
+					String SName = rset.getString("SName");
+					String level = rset.getString("Slevel");
+					String col = rset.getString("ENCRYPTEDCOLUMN");	
+					String roleIDtemp = rset.getString("OWNERROLE");
+					if(Integer.parseInt(roleIDtemp) == roleID)
+					{
+						String key = getEncrypKey(roleID);
+						if(Integer.parseInt(col) == 1) {
+							System.out.println(VigDecrypt(SName, key) + ", " + level);
+						} else if (Integer.parseInt(col) == 2) {
+							System.out.println(SName + ", " + VigDecrypt(level, key));
+						}
+					} else{
+						System.out.println(SName + ", " + level);
+					}
+				
+				} else if(table.equals("Course")) {
+					String CName = rset.getString("CName");
+					String DName = rset.getString("DName");
+					String CDesc = rset.getString("CDesc");
+					String Text = rset.getString("MainTextBook");
+					String col = rset.getString("ENCRYPTEDCOLUMN");	
+					String roleIDtemp = rset.getString("OWNERROLE");
+					if(Integer.parseInt(roleIDtemp) == roleID)
+					{
+						String key = getEncrypKey(roleID);
+						if(Integer.parseInt(col) == 1) {
+							System.out.println(VigDecrypt(CName, key) + ", " + DName + ", " + CDesc + ", " + Text);
+						} else if (Integer.parseInt(col) == 2) {
+							System.out.println(CName + ", " + VigDecrypt(DName,key) + ", " + CDesc + ", " + Text);
+						} else if (Integer.parseInt(col) == 3) {
+							System.out.println(CName + ", " + DName + ", " + VigDecrypt(CDesc,key) + ", " + Text);
+						} else if (Integer.parseInt(col) == 4) {
+							System.out.println(CName + ", " + DName + ", " + CDesc + ", " + VigDecrypt(Text,key));
+						}
+					} else{
+						System.out.println(CName + ", " + DName + ", " + CDesc + ", " + Text);
+					}					
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			System.out.println(e);
+		}	
+	}
+
 	
 	public static void main(String[] args) {		
 		//need to change this once i get project finish. change to unix 
@@ -786,5 +864,5 @@ public class Project4 {
 		else{
 			p4.InputFile("arg");
 		}
-	}
+	}	
 }

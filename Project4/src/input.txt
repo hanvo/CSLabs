@@ -1,5 +1,5 @@
 LOGIN admin pass
 LOGIN USER70 PASS1
-SELECT * FROM Department
+SELECT * FROM Course
 
 
