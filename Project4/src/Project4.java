@@ -1,6 +1,5 @@
 import java.io.*;
 import java.util.*;
-import java.security.interfaces.RSAKey;
 import java.sql.*;
 
 public class Project4 {
@@ -13,9 +12,9 @@ public class Project4 {
 	static int userIDStatic = 2; 
 	
 	String currentUser;
-	
-	
 
+	int CommandCounter = 1;
+	
 	public Project4(){
 		try {
 			Class.forName( "oracle.jdbc.driver.OracleDriver" );
@@ -125,11 +124,15 @@ public class Project4 {
         	scan = new Scanner( file );
         	while(scan.hasNext()){
         		String line = scan.nextLine();
+        		System.out.println(CommandCounter + " : " + line);
+        		CommandCounter++;
         		String[] commands = line.split("\\W");
         			
+        		if(commands[0].equals("Quit"))
+        			return;
+        		
         		switch (commands[0]) {
         			case "LOGIN":
-        				do{
         					//System.out.println("Login Procedure");
         					String userName = commands[1];
         					String pass = commands[2];
@@ -137,17 +140,17 @@ public class Project4 {
         					if(loginSuccessful){
         						currentUser = userName;
         						System.out.println("Login successful");
-        						System.out.println("LOGIN: " + currentUser);
+        						//System.out.println("LOGIN: " + currentUser);
         					}
         					else
         						System.out.println("Invalid login");
-        				} while(!loginSuccessful && scan.hasNext());
+        				
         				break;
         			case "CREATE":
         				//System.out.println("Create Procedure");
         				switch (commands[1]){
         					case "USER":
-        						System.out.println("USER");
+        						//System.out.println("USER");
         						String username = commands[2];
         						String password = commands[3];
         						boolean userCreationSucc = createUser(username,password);
@@ -155,7 +158,7 @@ public class Project4 {
         							System.out.println("User created successfully");        						
         						break;
         					case "ROLE":
-        						System.out.println("ROLE");
+        						//System.out.println("ROLE");
         						String roleName = commands[2];
         						String encKey = commands[3];
         						boolean roleCreationSucc = createRole(roleName,encKey);
@@ -165,10 +168,10 @@ public class Project4 {
         				}
         				break;
         			case "GRANT":
-        				System.out.println("Grant Procedure");
+        				//System.out.println("Grant Procedure");
         				switch (commands[1]){
     						case "ROLE":
-    							System.out.println("Granting Role");
+    							//System.out.println("Granting Role");
     							String grantUser = commands[2];
     							String grantRole = commands[3];
     							boolean grantRoleSucc = grantRole(grantUser,grantRole);
@@ -176,7 +179,7 @@ public class Project4 {
     								System.out.println("Role assigned successfully");
     							break;
     						case "PRIVILEGE":
-    							System.out.println("Granting Privilege");
+    							//System.out.println("Granting Privilege");
     							String privName = commands[2];
     							String roleName = commands[4];
     							String tableName = commands[6];
@@ -187,7 +190,7 @@ public class Project4 {
         				}
         				break;
         			case "REVOKE":
-        				System.out.println("Revoking");
+        				//System.out.println("Revoking");
         				String privName = commands[2];
         				String roleName = commands[4];
         				String tableName = commands[6];
@@ -196,14 +199,14 @@ public class Project4 {
         					System.out.println("Privilege revoked successfully");
         				break;
         			case "INSERT":
-        				System.out.println("Inserting");
+        				//System.out.println("Inserting");
         				String privType = commands[0];
         				String table = commands[2];
         				boolean checkPermissions = checkUserPriv(currentUser,privType,table);
         				if(checkPermissions) { 
         					switch (table){
         						case "Department":
-        							System.out.println("Department");
+        							//System.out.println("Department");
         							boolean insertDeptSucc = false;
         							String deptName = commands[4];
         							String location = commands[5];
@@ -213,12 +216,12 @@ public class Project4 {
         							{
         								String key = findEncryptKey(ownerRoleId);
         								if(encryptedCol == 1){
-        									System.out.println("DeptName");
+        									//System.out.println("DeptName");
         									String encryptStringDept = VigEncrypt(deptName, key);
             								insertDeptSucc = insertDepartment(encryptStringDept,location,encryptedCol,ownerRoleId);
         								}
         								else{
-        									System.out.println("Location");
+        									//System.out.println("Location");
         									String encryptStringLoc = VigEncrypt(location, key);
             								insertDeptSucc = insertDepartment(deptName,encryptStringLoc,encryptedCol,ownerRoleId);
         								}
@@ -229,7 +232,7 @@ public class Project4 {
         								System.out.println("Row inserted successfully");
         							break;
         						case "Student":
-        							System.out.println("Student");
+        							//System.out.println("Student");
         							boolean insertStudentSucc = false;
         							String studentName = commands[4];
         							String level = commands[5];
@@ -240,12 +243,12 @@ public class Project4 {
         							{
         								String key = findEncryptKey(ownerRoleId);
         								if(encryptedCol == 1){
-        									System.out.println("StudentName");
+        									//System.out.println("StudentName");
         									String encryptStringName = VigEncrypt(studentName, key);
             								insertStudentSucc = insertStudent(encryptStringName,level,encryptedCol,ownerRoleId);
         								}
         								else{
-        									System.out.println("Level");
+        									//System.out.println("Level");
         									String encryptStringLevel = VigEncrypt(level, key);
             								insertStudentSucc = insertStudent(studentName,encryptStringLevel,encryptedCol,ownerRoleId);
         								}
@@ -256,7 +259,7 @@ public class Project4 {
         								System.out.println("Row inserted successfully");
         							break;
         						case "Course":
-        							System.out.println("Course");
+        							//System.out.println("Course");
         							boolean insertCourseSucc = false;
         							String courseName = commands[4];
         							String dname = commands[5];
@@ -269,22 +272,22 @@ public class Project4 {
         							{
         								String key = findEncryptKey(ownerRoleId);
         								if(encryptedCol== 1) {
-        									System.out.println("CourseName");
+        									//System.out.println("CourseName");
         									String encryptStringCName = VigEncrypt(courseName, key);
             								insertCourseSucc = insertCourse(encryptStringCName,dname, des, textbook, encryptedCol, ownerRoleId);
         									
         								} else if (encryptedCol== 2) {
-        									System.out.println("Dept Name");
+        									//System.out.println("Dept Name");
         									String encryptStringDName = VigEncrypt(dname, key);
             								insertCourseSucc = insertCourse(courseName, encryptStringDName, des, textbook, encryptedCol, ownerRoleId);
         									
         								} else if (encryptedCol== 3) {
-        									System.out.println("Course Descipt");
+        									//System.out.println("Course Descipt");
         									String encryptStringCDes = VigEncrypt(des, key);
             								insertCourseSucc = insertCourse(courseName, dname, encryptStringCDes, textbook, encryptedCol, ownerRoleId);
         									
         								} else if (encryptedCol== 4) {
-        									System.out.println("Textbook");
+        									//System.out.println("Textbook");
         									String encryptStringtext = VigEncrypt(des, key);
             								insertCourseSucc = insertCourse(courseName, dname, des, encryptStringtext, encryptedCol, ownerRoleId);
         								}
@@ -301,23 +304,17 @@ public class Project4 {
         				}
         				break;
         			case "SELECT":
-        				System.out.println("SELECT");
+        				//System.out.println("SELECT");
         				privType = commands[0];
         				table = commands[4];
-        				
         				if(!checkUserPriv(currentUser, privType, table)) {
-        					System.out.println("Authorization failure 1");
+        					System.out.println("Authorization failure");
         					break;
-        				}        				
-        				
-        				checkSelect(privType, table);
-        					
-        				System.exit(0);        				
-        				break;
-        				
-        			case "QUIT":
-        				return;
+        				}        				      				
+        				Select(privType, table);
+          				break;
         		}	
+        		System.out.println("");
         	}
         } 
         catch ( FileNotFoundException e ){
@@ -356,7 +353,7 @@ public class Project4 {
 		boolean ret = false;
 		if(isAdmin)
 		{
-			System.out.println("Admin Status");
+			//System.out.println("Admin Status");
 			
 			String query = "INSERT INTO Roles VALUES(" + roleIDStatic + "," + "\'" + roleName + "\', \'" + encKey + "\')"; 
 			//System.out.println(query);
@@ -381,9 +378,9 @@ public class Project4 {
 	{
 		boolean ret = false;
 		if(isAdmin) {
-			System.out.println("Granted");
+			//System.out.println("Granted");
 			String query = "INSERT INTO Users VALUES(" + userIDStatic + "," + "\'" + username + "\', \'" + password + "\')"; 
-			System.out.println(query);
+			//System.out.println(query);
 			try {
 				Statement stmt = conn.createStatement();
 				stmt.executeUpdate( query );
@@ -404,12 +401,12 @@ public class Project4 {
 	public boolean grantRole(String grantUser, String grantRoleName){
 		boolean ret = false;
 		if(isAdmin){
-			System.out.println("Admin Status");
+			//System.out.println("Admin Status");
 			int user = getUserID(grantUser);
 			int role = getRoleID(grantRoleName);
 			
 			String update = "INSERT INTO userroles VALUES(" + user + "," + role + ")";
-			System.out.println(update);
+			//System.out.println(update);
 			try {
 				Statement stmt = conn.createStatement();
 				stmt.executeUpdate( update );
@@ -430,12 +427,12 @@ public class Project4 {
 	{
 		boolean ret = false;
 		if(isAdmin){
-			System.out.println("Admin power");
+			//System.out.println("Admin power");
 			int roleNum = getRoleNum(roleName);
 			int privNum = getPrivNum(privName);
 			
 			String update = "INSERT INTO RolePrivileges values(" + roleNum + ",'" + tableName +"'," + privNum +")";
-			System.out.println(update);
+			//System.out.println(update);
 			try {
 				Statement stmt = conn.createStatement();
 				stmt.executeUpdate( update );
@@ -464,7 +461,7 @@ public class Project4 {
 			
 			String update = "DELETE FROM roleprivileges WHERE RoleId = " + roleNum + " AND TableName = \'" + tableName + 
 					"\' AND PrivID = " + privNum;
-			System.out.println(update);
+			//System.out.println(update);
 			try {
 				Statement stmt = conn.createStatement();
 				stmt.executeUpdate( update );
@@ -641,7 +638,7 @@ public class Project4 {
 		boolean ret = false;
 			
 		String query = "INSERT INTO Department VALUES(\'" + dname  + "\'," + "\'" + location + "\', " + encryptedCol  + ", " + ownerId + ")"; 
-		System.out.println(query);
+		//System.out.println(query);
 		try {
 			Statement stmt = conn.createStatement();
 			stmt.executeUpdate( query );
@@ -660,7 +657,7 @@ public class Project4 {
 		boolean ret = false;
 		
 		String query = "INSERT INTO Student VALUES(\'" + studentName  + "\'," + "\'" + level + "\', " + encryptedCol  + ", " + ownerRoleId + ")"; 
-		System.out.println(query);
+		//System.out.println(query);
 		try {
 			Statement stmt = conn.createStatement();
 			stmt.executeUpdate( query );
@@ -680,7 +677,7 @@ public class Project4 {
 		
 		String query = "INSERT INTO Course VALUES(\'" + courseName  + "\'," + "\'" + dname + "\', \'"  +  des + "\', \'" + textbook
 				+ "\', " + encryptedCol  + ", " + ownerRoleId + ")"; 
-		System.out.println(query);
+		//System.out.println(query);
 				
 		try {
 			Statement stmt = conn.createStatement();
@@ -695,11 +692,11 @@ public class Project4 {
 		return ret;
 	}
 	
-	public int checkSelect(String privType, String tableName)
+	public void Select(String privType, String tableName)
 	{
 		int privId = getPrivNum(privType);
 		int currUserId = getUserID(currentUser);
-		
+		boolean results = false;
 		String roleId = "";
 		String query = "SELECT roleid FROM RolePrivileges WHERE PrivId = " + privId + " AND TableName = \'" + tableName + "\'";
 		//System.out.println(query);
@@ -708,12 +705,7 @@ public class Project4 {
 			ResultSet rs = stmt.executeQuery( query );
 			while(rs.next()){
 				roleId = rs.getString("RoleId");
-				boolean results = CheckUserRoles(currUserId,Integer.parseInt(roleId));
-				if(results)
-				{
-					printTable(tableName, Integer.parseInt(roleId));
-
-				}
+				results = CheckUserRoles(currUserId,Integer.parseInt(roleId));
 			}
 			rs.close();
 			stmt.close();
@@ -721,10 +713,10 @@ public class Project4 {
 		catch ( SQLException e ) {
 			e.printStackTrace();
 		}
-
-		return -1; 
+		//if(results)
+		printTable(tableName, Integer.parseInt(roleId));
+		
 	}
-	
 	
 	public boolean CheckUserRoles(int currUserId, int roleId)
 	{
@@ -852,7 +844,6 @@ public class Project4 {
 		}	
 	}
 
-	
 	public static void main(String[] args) {		
 		//need to change this once i get project finish. change to unix 
 		Project4 p4 = new Project4();
